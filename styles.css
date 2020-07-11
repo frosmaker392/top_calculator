@@ -1,0 +1,15 @@
+.calc-body{
+    max-width: 400px;
+    max-height: 800px;
+}
+
+.calc-btn-container{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.calc-btn{
+    width: auto;
+    height: 30px;
+}
