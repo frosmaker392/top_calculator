@@ -1,9 +1,14 @@
+@font-face{
+    font-family: "DSEG7";
+    src: url("fonts/DSEG7Classic-BoldItalic.ttf") format("truetype");
+}
+
 .calc-body{
     display: flex;
     flex-direction: column;
     align-content: stretch;
 
-    max-width: 300px;
+    max-width: 320px;
     padding: 5px;
     height: 400px;
 }
@@ -19,6 +24,16 @@
 
 .calc-display{
     border: 1px solid black;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.display-container{
+    margin: 10px;
+    font-family: "DSEG7", monospace;
+    font-size: 35px;
+    text-align: right;
+    position: relative;
 }
 
 .calc-btn{
@@ -32,7 +47,7 @@
     width: auto;
     height: auto;
     border: 1px solid black;
-    border-radius: 10%;
+    border-radius: 8px;
     padding: 10px;
 }
 
@@ -40,9 +55,18 @@
     font-size: 32px;
 }
 
+#display-bg{
+    color: #efefef;
+    display: block;
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+}
+
 #display-num{
-    margin: 10px;
-    text-align: right;
+    position: relative;
+    display: block;
+    z-index: 20;
 }
 
 #bksp-icon{
