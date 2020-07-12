@@ -22,14 +22,29 @@
 }
 
 .calc-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Inconsolata', monospace;
+    font-weight: 600;
+    font-size: 26px;
     width: auto;
     height: auto;
     border: 1px solid black;
     border-radius: 10%;
-    padding: 0;
+    padding: 10px;
+}
+
+.calc-btn.op{
+    font-size: 32px;
 }
 
 #display-num{
     margin: 10px;
     text-align: right;
+}
+
+#bksp-icon{
+    max-width: 40px;
 }
