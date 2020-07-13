@@ -10,8 +10,7 @@ const operations = [add, subtract, multiply, divide];
 function operate(a, b, index){
     if(index > 3) return null;
 
-    const s = operations[index](a, b);
-    console.log(s);
+    return operations[index](a, b);
 }
 
 (function(){
@@ -26,10 +25,50 @@ function operate(a, b, index){
     //True if leftmost digit is a zero
     let rejectZero = true;
 
+    let storedNumber = null;
+    let operatorIndex = null;
+
     displayNum.textContent = 0;
 
-    function updateDisplay(){
-        displayNum.textContent = displayCharArr.join('');
+    function updateDisplay(number = null){
+        if(number === null){
+            displayNum.textContent = displayCharArr.join('');
+            return;
+        }
+        else{
+            let displayText;
+
+            const isNegative = number < 0;
+            const exp = number === 0 ? 0 : Math.log10(Math.abs(number));
+            if(exp > (isNegative ? 9 : 10)){
+                displayText = number.toExponential(isNegative ? 5 : 6).replace('+', '');
+            }
+            else if(exp < (isNegative ? -8 : -9)){
+                displayText = number.toExponential(isNegative ? 4 : 5);
+            }
+            else{
+                //dividing by 1 somehow fixes the trailing zeroes
+                displayText = number.toPrecision(isNegative ? 9 : 10) / 1;
+            }
+            displayNum.textContent = displayText;
+        }
+            
+    }
+
+    function storeNumber(){
+        if(storedNumber === null){
+            storedNumber = parseFloat(displayCharArr.join(''));
+            console.log(storedNumber);
+        }
+        else{
+            storedNumber = operate(storedNumber, parseFloat(displayCharArr.join('')), operatorIndex);
+        }
+
+        updateDisplay(storedNumber);
+
+        dp = false;
+        displayCharArr = [0];
+        digitCount = 0;
     }
 
     //Adds a digit at the right of the displayNum value (num * 10 + digit)
@@ -39,7 +78,7 @@ function operate(a, b, index){
 
         if(!rejectZero || digitChar !== '0'){
             if(digitCount !== 0){
-                displayCharArr.push(digitChar);    
+                displayCharArr.push(digitChar);
             }
             else{
                 displayCharArr[0] = digitChar;
@@ -53,7 +92,7 @@ function operate(a, b, index){
     //Adds decimal point, toggles dp to true
     //Does nothing if dp is already true
     function triggerDP(){
-        if(dp) return;
+        if(dp || digitCount === 10) return;
 
         if(digitCount === 0){
             rejectZero = false;
@@ -94,7 +133,10 @@ function operate(a, b, index){
             });
         }
         else if(btn.classList.contains('op')){
-            //TODO
+            btn.addEventListener('click', (e)=>{
+                storeNumber();
+                operatorIndex = +e.target.getAttribute('data-op');
+            });
         }
         else if(btn.classList.contains('mod')){
             let onClick;
