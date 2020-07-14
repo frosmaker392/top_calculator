@@ -26,6 +26,7 @@ function operate(a, b, index){
     let dp = false;
     //True if leftmost digit is a user-input zero
     let acceptZero = false;
+    let negative = false;
 
     //Previous entry and current operator stored in memory
     let storedNumber = null;
@@ -33,11 +34,18 @@ function operate(a, b, index){
 
     displayNum.textContent = 0;
 
+    function resetInput(){
+        negative = false;
+        dp = false;
+        inputCharArr = [0];
+        charCount = 0;
+    }
+
     //Updates the display based on inputCharArr for no arguments
     //Formats the number argument and updates the display with the formatted number
     function updateDisplay(number = null){
         if(number === null){
-            displayNum.textContent = inputCharArr.join('');
+            displayNum.textContent = inputCharArr.slice(0, 10).join('');
             return;
         }
         else{
@@ -67,18 +75,16 @@ function operate(a, b, index){
     function storeNumber(){
         if(storedNumber === null){
             storedNumber = parseFloat(inputCharArr.join(''));
-            console.log(storedNumber);
         }
         else{
             if(charCount !== 0)
                 storedNumber = operate(storedNumber, parseFloat(inputCharArr.join('')), operatorIndex);
         }
 
+        console.log(storedNumber);
         updateDisplay(storedNumber);
 
-        dp = false;
-        inputCharArr = [0];
-        charCount = 0;
+        resetInput();
     }
 
     //Adds a digit at the right of the displayNum value (num * 10 + digit)
@@ -91,7 +97,7 @@ function operate(a, b, index){
                 inputCharArr.push(digitChar);
             }
             else{
-                inputCharArr[0] = digitChar;
+                inputCharArr[negative ? 1 : 0] = digitChar;
             }
             acceptZero = true;
             updateDisplay();
@@ -118,6 +124,18 @@ function operate(a, b, index){
         dp = true;
     }
 
+    function togglePlusMinus(){
+        if(negative){
+            inputCharArr.shift();
+            negative = false;
+        }
+        else{
+            inputCharArr.unshift('-');
+            negative = true;
+        }
+        updateDisplay();
+    }
+
     //Removes last digit/dp in the display char array
     function backspace(){
         if(charCount === 0) return;
@@ -141,6 +159,20 @@ function operate(a, b, index){
             updateDisplay();
     }
 
+    function clear(){
+        //If input is empty, then clear storedNumber and operatorIndex
+        if(charCount === 0 && !negative){
+            storedNumber = null;
+            operatorIndex = null;
+            updateDisplay();
+        }
+        //otherwise reset entry
+        else{
+            resetInput();
+            updateDisplay();
+        }
+    }
+
     calcBtns.forEach((btn) => {
         if(btn.classList.contains('num')){
             btn.addEventListener('click', (e) => {
@@ -161,6 +193,12 @@ function operate(a, b, index){
                     break;
                 case 'back':
                     onClick = backspace;
+                    break;
+                case 'plusminus':
+                    onClick = togglePlusMinus;
+                    break;
+                case 'ac-ce':
+                    onClick = clear;
                     break;
             }
 
