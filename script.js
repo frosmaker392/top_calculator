@@ -30,6 +30,7 @@ function operate(a, b, index){
 
     //Previous entry and current operator stored in memory
     let storedNumber = null;
+    let storedNumber2 = null;
     let operatorIndex = null;
 
     displayNum.textContent = 0;
@@ -40,6 +41,10 @@ function operate(a, b, index){
         inputCharArr = [0];
         charCount = 0;
     }
+
+    /*
+        TODO : REFACTOR!!! addDigit should only deal with numbers not all that nonsense!
+    */
 
     //Updates the display based on inputCharArr for no arguments
     //Formats the number argument and updates the display with the formatted number
@@ -73,12 +78,20 @@ function operate(a, b, index){
 
     //Stores the previous user entry as a number, then resets input field
     function storeNumber(){
-        if(storedNumber === null){
-            storedNumber = parseFloat(inputCharArr.join(''));
+        if(charCount === 0 && operatorIndex === null){
+            if(storedNumber === null) storedNumber = 0;
+            
         }
         else{
-            if(charCount !== 0)
+            if(storedNumber === null || operatorIndex === null){
+                storedNumber = parseFloat(inputCharArr.join(''));
+            }
+            else if(charCount !== 0){
+                if(storedNumber2 === null){
+                    storedNumber2 = parseFloat(inputCharArr.join(''));
+                }
                 storedNumber = operate(storedNumber, parseFloat(inputCharArr.join('')), operatorIndex);
+            }
         }
 
         console.log(storedNumber);
@@ -203,6 +216,14 @@ function operate(a, b, index){
             }
 
             btn.addEventListener('click', onClick);
+        }
+        else{
+            if(btn.id === 'equals'){
+                btn.addEventListener('click', () => {
+                    storeNumber();
+                    operatorIndex = null;
+                });
+            }
         }
     });
 })();
