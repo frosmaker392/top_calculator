@@ -17,110 +17,125 @@ function operate(a, b, index){
     const displayNum = document.querySelector('#display-num');
     const calcBtns = document.querySelectorAll(".calc-btn");
 
-    let displayCharArr = [0];
-    let digitCount = 0;
+    const maxCharCount = 10;
+    let inputCharArr = [0];
+    //charCount excludes '.'
+    let charCount = 0;
 
     //True if decimal point is used
     let dp = false;
-    //True if leftmost digit is a zero
-    let rejectZero = true;
+    //True if leftmost digit is a user-input zero
+    let acceptZero = false;
 
+    //Previous entry and current operator stored in memory
     let storedNumber = null;
     let operatorIndex = null;
 
     displayNum.textContent = 0;
 
+    //Updates the display based on inputCharArr for no arguments
+    //Formats the number argument and updates the display with the formatted number
     function updateDisplay(number = null){
         if(number === null){
-            displayNum.textContent = displayCharArr.join('');
+            displayNum.textContent = inputCharArr.join('');
             return;
         }
         else{
             let displayText;
-
-            const isNegative = number < 0;
+            
+            const digitOffset = number < 0 ? 1 : 0;
             const exp = number === 0 ? 0 : Math.log10(Math.abs(number));
-            if(exp > (isNegative ? 9 : 10)){
-                displayText = number.toExponential(isNegative ? 5 : 6).replace('+', '');
+            if(exp > (10 - digitOffset)){
+                displayText = number.toExponential(6 - digitOffset).replace('+', '');
             }
-            else if(exp < (isNegative ? -8 : -9)){
-                displayText = number.toExponential(isNegative ? 4 : 5);
+            else if(exp < (-9 + digitOffset)){
+                displayText = number.toExponential(5 - digitOffset);
             }
             else{
+                const absBelowOne = Math.abs(number) < 1;
+
+                //subtract one more from precision if abs(number) < 1
+                //as 0 is not counted as a significant figure
                 //dividing by 1 somehow fixes the trailing zeroes
-                displayText = number.toPrecision(isNegative ? 9 : 10) / 1;
+                displayText = number.toPrecision(10 - digitOffset - (absBelowOne ? 1 : 0)) / 1;
             }
             displayNum.textContent = displayText;
         }
-            
     }
 
+    //Stores the previous user entry as a number, then resets input field
     function storeNumber(){
         if(storedNumber === null){
-            storedNumber = parseFloat(displayCharArr.join(''));
+            storedNumber = parseFloat(inputCharArr.join(''));
             console.log(storedNumber);
         }
         else{
-            storedNumber = operate(storedNumber, parseFloat(displayCharArr.join('')), operatorIndex);
+            if(charCount !== 0)
+                storedNumber = operate(storedNumber, parseFloat(inputCharArr.join('')), operatorIndex);
         }
 
         updateDisplay(storedNumber);
 
         dp = false;
-        displayCharArr = [0];
-        digitCount = 0;
+        inputCharArr = [0];
+        charCount = 0;
     }
 
     //Adds a digit at the right of the displayNum value (num * 10 + digit)
     //Doesn't do anything if number of digits equal 10
     function addDigit(digitChar){
-        if(digitCount === 10) return;
+        if(charCount === maxCharCount) return;
 
-        if(!rejectZero || digitChar !== '0'){
-            if(digitCount !== 0){
-                displayCharArr.push(digitChar);
+        if(digitChar !== '0'){
+            if(charCount !== 0){
+                inputCharArr.push(digitChar);
             }
             else{
-                displayCharArr[0] = digitChar;
+                inputCharArr[0] = digitChar;
             }
+            acceptZero = true;
             updateDisplay();
-            digitCount++;
-            rejectZero = false;
+            charCount++;
+        }
+        else if(acceptZero){
+            if(charCount !== 0)
+                inputCharArr.push(digitChar);
+            updateDisplay();
         }
     }
 
     //Adds decimal point, toggles dp to true
     //Does nothing if dp is already true
     function triggerDP(){
-        if(dp || digitCount === 10) return;
+        if(dp || charCount === maxCharCount) return;
 
-        if(digitCount === 0){
-            rejectZero = false;
-            digitCount++;
+        if(charCount === 0){
+            acceptZero = true;
+            charCount++;
         }
-        displayCharArr.push('.');
+        inputCharArr.push('.');
         updateDisplay();
         dp = true;
     }
 
     //Removes last digit/dp in the display char array
     function backspace(){
-        if(digitCount === 0) return;
+        if(charCount === 0) return;
 
-        const removedElement = displayCharArr.pop();
+        const removedElement = inputCharArr.pop();
         if(removedElement === '.'){
-            if(digitCount === 1 && displayCharArr[0] === '0'){
-                digitCount--;
+            if(charCount === 1 && inputCharArr[0] === '0'){
+                charCount--;
             }
             else{
                 dp = false;
             }
         }
-        else digitCount--;
+        else charCount--;
 
-        if(digitCount === 0){
+        if(charCount === 0){
             displayNum.textContent = 0;
-            rejectZero = true;
+            acceptZero = false;
         }
         else
             updateDisplay();
