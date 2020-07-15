@@ -15,7 +15,10 @@ function operate(a, b, index){
 
 (function(){
     const displayNum = document.querySelector('#display-num');
-    const calcBtns = document.querySelectorAll(".calc-btn");
+    const numBtns = document.querySelectorAll(".calc-btn.num");
+    const opBtns = document.querySelectorAll(".calc-btn.op");
+    const modBtns = document.querySelectorAll(".calc-btn.mod");
+    const equalBtn = document.querySelector(".calc-btn.eq");
 
     const maxCharCount = 10;
     let inputCharArr = [0];
@@ -27,24 +30,20 @@ function operate(a, b, index){
     //True if leftmost digit is a user-input zero
     let acceptZero = false;
     let negative = false;
-
-    //Previous entry and current operator stored in memory
-    let storedNumber = null;
-    let storedNumber2 = null;
-    let operatorIndex = null;
+    let userHasInput = false;
+    
+    //Memory array simulates actual calculator memory (kinda)
+    let memory = [];
 
     displayNum.textContent = 0;
 
     function resetInput(){
         negative = false;
+        userHasInput = false;
         dp = false;
         inputCharArr = [0];
         charCount = 0;
     }
-
-    /*
-        TODO : REFACTOR!!! addDigit should only deal with numbers not all that nonsense!
-    */
 
     //Updates the display based on inputCharArr for no arguments
     //Formats the number argument and updates the display with the formatted number
@@ -78,26 +77,38 @@ function operate(a, b, index){
 
     //Stores the previous user entry as a number, then resets input field
     function storeNumber(){
-        if(charCount === 0 && operatorIndex === null){
-            if(storedNumber === null) storedNumber = 0;
-            
+        let num = NaN;
+        const lastMemoryElement = memory[1];
+        //console.log("last element : " + typeof(lastMemoryElement));
+
+        num = parseFloat(inputCharArr.join(''));
+        //Evaluate and store number if last element is an operator
+        if(typeof(lastMemoryElement) === typeof("")){
+            memory.push(num);
+
+            const evaluated = operate(memory[0], memory[2], +lastMemoryElement);
+            num = evaluated;
+            memory = [evaluated];
         }
+        //Otherwise reset memory and store number
         else{
-            if(storedNumber === null || operatorIndex === null){
-                storedNumber = parseFloat(inputCharArr.join(''));
-            }
-            else if(charCount !== 0){
-                if(storedNumber2 === null){
-                    storedNumber2 = parseFloat(inputCharArr.join(''));
-                }
-                storedNumber = operate(storedNumber, parseFloat(inputCharArr.join('')), operatorIndex);
-            }
+            memory = [];
+            memory.push(num);;
         }
 
-        console.log(storedNumber);
-        updateDisplay(storedNumber);
+        updateDisplay(num);
 
         resetInput();
+    }
+
+    function pushOperator(index){
+        console.log(memory);
+        if(index !== null){
+            if(typeof(memory[1]) === typeof(""))
+                memory[1] = index;
+            else
+                memory.push(index);
+        }
     }
 
     //Adds a digit at the right of the displayNum value (num * 10 + digit)
@@ -121,6 +132,7 @@ function operate(a, b, index){
                 inputCharArr.push(digitChar);
             updateDisplay();
         }
+        userHasInput = true;
     }
 
     //Adds decimal point, toggles dp to true
@@ -166,6 +178,7 @@ function operate(a, b, index){
 
         if(charCount === 0){
             displayNum.textContent = 0;
+            userHasInput = false;
             acceptZero = false;
         }
         else
@@ -173,10 +186,9 @@ function operate(a, b, index){
     }
 
     function clear(){
-        //If input is empty, then clear storedNumber and operatorIndex
+        //If input is empty
         if(charCount === 0 && !negative){
-            storedNumber = null;
-            operatorIndex = null;
+            memory = [];
             updateDisplay();
         }
         //otherwise reset entry
@@ -184,47 +196,60 @@ function operate(a, b, index){
             resetInput();
             updateDisplay();
         }
+
+        console.log(memory);
     }
 
-    calcBtns.forEach((btn) => {
-        if(btn.classList.contains('num')){
-            btn.addEventListener('click', (e) => {
-                addDigit(e.target.id);
-            });
-        }
-        else if(btn.classList.contains('op')){
-            btn.addEventListener('click', (e)=>{
-                storeNumber();
-                operatorIndex = +e.target.getAttribute('data-op');
-            });
-        }
-        else if(btn.classList.contains('mod')){
-            let onClick;
-            switch(btn.id){
-                case 'point':
-                    onClick = triggerDP;
-                    break;
-                case 'back':
-                    onClick = backspace;
-                    break;
-                case 'plusminus':
-                    onClick = togglePlusMinus;
-                    break;
-                case 'ac-ce':
-                    onClick = clear;
-                    break;
-            }
+    // function sqrt(){
+    //     if(!userHasInput) return;
 
-            btn.addEventListener('click', onClick);
+    //     const num = Math.sqrt(parseFloat(inputCharArr.join('')));
+    //     memory.push(num);
+
+    //     updateDisplay(num);
+    // }
+    
+    numBtns.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            addDigit(e.target.id);
+        });
+    });
+       
+    opBtns.forEach((btn) => {
+        btn.addEventListener('click', (e)=>{
+            if(userHasInput)
+                storeNumber();
+            pushOperator(e.target.getAttribute('data-op'));
+        });
+    });
+
+    modBtns.forEach((btn) => {
+        let onClick = () => {console.log("Mod button not implemented!")};
+        switch(btn.id){
+            case 'point':
+                onClick = triggerDP;
+                break;
+            case 'back':
+                onClick = backspace;
+                break;
+            case 'plusminus':
+                onClick = togglePlusMinus;
+                break;
+            case 'ac-ce':
+                onClick = clear;
+                break;
+            case 'sqrt':
+                onClick = sqrt;
+                break;
         }
-        else{
-            if(btn.id === 'equals'){
-                btn.addEventListener('click', () => {
-                    storeNumber();
-                    operatorIndex = null;
-                });
-            }
-        }
+
+        btn.addEventListener('click', onClick);
+    });
+    
+    equalBtn.addEventListener('click', () => {
+        if(userHasInput)
+            storeNumber();
+        pushOperator(null);
     });
 })();
 
