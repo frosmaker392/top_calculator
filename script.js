@@ -31,6 +31,7 @@ function operate(a, b, index){
     let acceptZero = false;
     let negative = false;
     let userHasInput = false;
+    let blockButtons = false;
     
     //Memory array simulates actual calculator memory (kinda)
     let memory = [];
@@ -75,6 +76,17 @@ function operate(a, b, index){
         }
     }
 
+    function showError(){
+        blockButtons = true;
+        displayNum.textContent = 'error';
+        setTimeout(() => {
+            resetInput();
+            memory = [];
+            updateDisplay();
+            blockButtons = false;
+        }, 2000);
+    }
+
     //Stores the previous user entry as a number, then resets input field
     function storeNumber(){
         let num = NaN;
@@ -86,25 +98,13 @@ function operate(a, b, index){
         if(memory.length === 3){
             num = operate(memory[0], memory[2], +memory[1]);
         }
+        
+        if(!isFinite(num) || isNaN(num)){
+            showError();
+            return;
+        }
         memory = [];
         memory.push(num);
-
-        // //Evaluate and store number if last element is an operator
-        // if(memory.length === 2){
-        //     memory.push(num);
-
-        //     const evaluated = operate(memory[0], memory[2], +memory[1]);
-        //     num = evaluated;
-        //     memory = [evaluated];
-        // }
-        // //Otherwise reset memory and store number
-        // else{
-        //     if(memory.length === 3 && inputCharArr === []){
-        //         num = operate(memory[0], memory[2], +memory[1]);
-        //     }
-        //     memory = [];
-        //     memory.push(num);
-        // }
 
         updateDisplay(num);
         resetInput();
@@ -226,6 +226,12 @@ function operate(a, b, index){
             memory.push(num);
         }
 
+        console.log(num);
+        if(isNaN(num)){
+            showError();
+            return;
+        }
+
         userHasInput = false;
         resetInput();
         updateDisplay(num);
@@ -233,12 +239,15 @@ function operate(a, b, index){
     
     numBtns.forEach((btn) => {
         btn.addEventListener('click', (e) => {
+            if(blockButtons) return;
             addDigit(e.target.id);
         });
     });
        
     opBtns.forEach((btn) => {
         btn.addEventListener('click', (e)=>{
+            if(blockButtons) return;
+
             if(userHasInput)
                 storeNumber();
             pushOperator(e.target.getAttribute('data-op'));
@@ -265,13 +274,50 @@ function operate(a, b, index){
                 break;
         }
 
-        btn.addEventListener('click', onClick);
+        btn.addEventListener('click', () => {
+            if(blockButtons) return;
+            onClick();
+        });
     });
     
     equalBtn.addEventListener('click', () => {
+        if(blockButtons) return;
         if(userHasInput)
             storeNumber();
         pushOperator(null);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const keycode = e.keyCode;
+        if(keycode >= 96 && keycode <= 105 || keycode >= 48 && keycode <= 57){
+            const btnID = keycode > 95 ? keycode - 96 : keycode - 48;
+            document.getElementById(`${btnID}`).click();
+        }
+        else{
+            switch(keycode){
+                case 110:
+                    document.querySelector('.mod#point').click();
+                    break;
+                case 107:
+                    document.querySelector('.op#add').click();
+                    break;
+                case 109:
+                    document.querySelector('.op#subtract').click();
+                    break;
+                case 106:
+                    document.querySelector('.op#multiply').click();
+                    break;
+                case 111:
+                    document.querySelector('.op#divide').click();
+                    break;
+                case 13:
+                    document.querySelector('.eq').click();
+                    break;
+                case 8:
+                    document.querySelector('.mod#back').click();
+                    break;
+            }
+        }
     });
 })();
 
