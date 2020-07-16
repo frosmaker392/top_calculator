@@ -78,26 +78,35 @@ function operate(a, b, index){
     //Stores the previous user entry as a number, then resets input field
     function storeNumber(){
         let num = NaN;
-        const lastMemoryElement = memory[1];
-        //console.log("last element : " + typeof(lastMemoryElement));
 
-        num = parseFloat(inputCharArr.join(''));
-        //Evaluate and store number if last element is an operator
-        if(typeof(lastMemoryElement) === typeof("")){
-            memory.push(num);
+        num = inputCharArr === [] ? 0 : parseFloat(inputCharArr.join(''));
 
-            const evaluated = operate(memory[0], memory[2], +lastMemoryElement);
-            num = evaluated;
-            memory = [evaluated];
+        if(memory.length === 2) memory.push(num);
+
+        if(memory.length === 3){
+            num = operate(memory[0], memory[2], +memory[1]);
         }
-        //Otherwise reset memory and store number
-        else{
-            memory = [];
-            memory.push(num);;
-        }
+        memory = [];
+        memory.push(num);
+
+        // //Evaluate and store number if last element is an operator
+        // if(memory.length === 2){
+        //     memory.push(num);
+
+        //     const evaluated = operate(memory[0], memory[2], +memory[1]);
+        //     num = evaluated;
+        //     memory = [evaluated];
+        // }
+        // //Otherwise reset memory and store number
+        // else{
+        //     if(memory.length === 3 && inputCharArr === []){
+        //         num = operate(memory[0], memory[2], +memory[1]);
+        //     }
+        //     memory = [];
+        //     memory.push(num);
+        // }
 
         updateDisplay(num);
-
         resetInput();
     }
 
@@ -200,14 +209,27 @@ function operate(a, b, index){
         console.log(memory);
     }
 
-    // function sqrt(){
-    //     if(!userHasInput) return;
+    function sqrt(){
+        let num = null;
+        //If last element is an operator
+        if(memory.length === 2 && !userHasInput){
+            console.log('pop');
+            memory.pop();
+        }
 
-    //     const num = Math.sqrt(parseFloat(inputCharArr.join('')));
-    //     memory.push(num);
+        if(memory.length === 1){
+            num = Math.sqrt(memory[0]);
+            memory[0] = num;
+        }
+        else{
+            num = Math.sqrt(parseFloat(inputCharArr.join('')));
+            memory.push(num);
+        }
 
-    //     updateDisplay(num);
-    // }
+        userHasInput = false;
+        resetInput();
+        updateDisplay(num);
+    }
     
     numBtns.forEach((btn) => {
         btn.addEventListener('click', (e) => {
