@@ -3,6 +3,29 @@
     src: url("fonts/DSEG7Classic-BoldItalic.ttf") format("truetype");
 }
 
+html{
+    font-family: sans-serif;
+    text-align: center;
+}
+
+body{
+    background-color: rgb(25, 33, 65);
+    color: white;
+}
+
+a{
+    color: rgb(197, 197, 197);
+}
+
+header{
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+footer{
+    margin-top: 40px;
+}
+
 .calc-body{
     display: flex;
     flex-direction: column;
@@ -132,3 +155,8 @@
     font-size: 21px;
 }
 
+#hint{
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 30px;
+}
